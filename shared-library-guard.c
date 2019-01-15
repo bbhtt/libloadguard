@@ -1,3 +1,5 @@
+#include <link.h>
+
 static char** blockedlist_patterns;
 
 
@@ -86,8 +88,24 @@ load_blocked_list(void) {
   }
 }
 
+char
+*la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
+  switch (flat) {
+    case LA_SER_ORIG:
+    case LA_SER_LIBPATH:
+      for (size_t i = 0; blockedlist_patterns[i] != NULL; ++i)
+      {
+        if (match_path(blockedlist_patterns[i], buf) == 0)
+        {
+          return NULL;
+        }
+      }
+  }
+  return name;
+}
 
-unsigned int la_version(unsigned int version) {
+unsigned int
+la_version(unsigned int version) {
   load_blocked_list();
   if (blocked_list_patterns == NULL) {
     return 0;
