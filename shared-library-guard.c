@@ -88,5 +88,10 @@ load_blocked_list(void) {
 
 
 unsigned int la_version(unsigned int version) {
-  return 0;
+  load_blocked_list();
+  if (blocked_list_patterns == NULL) {
+    return 0;
+  } else {
+    return version;
+  }
 }
