@@ -112,17 +112,13 @@ load_blocked_list(void) {
 
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
-  switch (flag) {
-    case LA_SER_ORIG:
-    case LA_SER_LIBPATH:
-      for (size_t i = 0; blockedlist_patterns[i] != NULL; ++i)
-      {
-        if (match_path(blockedlist_patterns[i], name) == 0)
+  for (size_t i = 0; blockedlist_patterns[i] != NULL; ++i)
+    {
+      if (match_path(blockedlist_patterns[i], name) == 0)
         {
           return NULL;
         }
-      }
-  }
+    }
   return (char*)name;
 }
 
