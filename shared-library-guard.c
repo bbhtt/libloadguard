@@ -112,22 +112,23 @@ load_blocked_list(void) {
 
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
-  for (size_t i = 0; blockedlist_patterns[i] != NULL; ++i)
-    {
-      if (match_path(blockedlist_patterns[i], name) == 0)
-        {
-          return NULL;
-        }
-    }
+  if (blockedlist_patterns =! NULL) {
+    for (size_t i = 0; blockedlist_patterns[i] != NULL; ++i)
+      {
+	if (match_path(blockedlist_patterns[i], name) == 0)
+	  {
+	    return NULL;
+	  }
+      }
+  }
   return (char*)name;
 }
 
 unsigned int
 la_version(unsigned int version) {
   load_blocked_list();
-  if (blockedlist_patterns == NULL) {
-    return 0;
-  } else {
-    return version;
-  }
+  /* TODO: See if a bug is filed about glibc crashing if audit hook
+     disables itself by returning version 0 like documentation says
+     it can. */
+  return version;
 }
