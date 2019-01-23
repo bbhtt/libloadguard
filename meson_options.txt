@@ -1,0 +1,1 @@
+option('shared_library_guard_config', type : 'string', value : '/etc/freedesktop-sdk.ld.so.blockedlist', description : 'File whose lines are file pattern library pattern pairs')

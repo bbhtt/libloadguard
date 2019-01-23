@@ -10,10 +10,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "config.h"
 
 
 static char** blockedlist_patterns = NULL;
-static const char blockedlist_file_name[] = "/etc/freedesktop-sdk.ld.so.blockedlist";
+static const char blockedlist_file_name[] = SHARED_LIBRARY_GUARD_CONFIG;
 extern char* program_invocation_name;
 
 
