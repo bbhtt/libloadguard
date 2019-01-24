@@ -31,7 +31,6 @@
 
 
 static char** blockedlist_patterns = NULL;
-static const char blockedlist_file_name[] = SHARED_LIBRARY_GUARD_CONFIG;
 extern char* program_invocation_name;
 
 
@@ -96,11 +95,11 @@ read_whole_file(const char* name, size_t *file_size) {
 
 static
 void
-load_blocked_list(void) {
+load_blocked_list(const char* process_name, const char* config_name) {
   blockedlist_patterns = NULL;
   size_t found_patterns = 0;
   size_t file_size = 0;
-  char* file_data = read_whole_file(blockedlist_file_name, &file_size);
+  char* file_data = read_whole_file(config_name, &file_size);
   if(file_data == NULL)
     return;
   size_t pos = 0;
@@ -110,7 +109,7 @@ load_blocked_list(void) {
     pos += pattern_pos + 1;
     if (pos >= file_size)
       break ;
-    if (match_path(pattern, program_invocation_name)) {
+    if (match_path(pattern, process_name)) {
       char *new_pattern;
       pattern_pos = read_pattern(file_data, pos, file_size, pattern);
       pos += pattern_pos + 1;
@@ -147,9 +146,6 @@ char
 
 unsigned int
 la_version(unsigned int version) {
-  load_blocked_list();
-  /* TODO: See if a bug is filed about glibc crashing if audit hook
-     disables itself by returning version 0 like documentation says
-     it can. */
+  load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
   return version;
 }
