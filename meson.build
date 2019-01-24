@@ -1,7 +1,7 @@
 project('shared-library-guard', 'c', license : 'LGPL')
 
 conf_data = configuration_data()
-conf_data.set('SHARED_LIBRARY_GUARD_CONFIG', get_option('shared_library_guard_config'))
+conf_data.set_quoted('SHARED_LIBRARY_GUARD_CONFIG', get_option('shared_library_guard_config'))
 configure_file(output : 'config.h', configuration : conf_data)
 
 
