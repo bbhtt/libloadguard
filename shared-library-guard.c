@@ -30,7 +30,7 @@
 #include "config.h"
 
 
-static char** blockedlist_patterns = NULL;
+static char** blocked_list_patterns = NULL;
 extern char* program_invocation_name;
 
 
@@ -96,7 +96,7 @@ read_whole_file(const char* name, size_t *file_size) {
 static
 void
 load_blocked_list(const char* process_name, const char* config_name) {
-  blockedlist_patterns = NULL;
+  blocked_list_patterns = NULL;
   size_t found_patterns = 0;
   size_t file_size = 0;
   char* file_data = read_whole_file(config_name, &file_size);
@@ -115,14 +115,14 @@ load_blocked_list(const char* process_name, const char* config_name) {
       pos += pattern_pos + 1;
       new_pattern = (char*)malloc(pattern_pos);
       memcpy(pattern, new_pattern, pattern_pos);
-      if (blockedlist_patterns == NULL) {
-	blockedlist_patterns = (char**)malloc(2*sizeof(char*));
+      if (blocked_list_patterns == NULL) {
+	blocked_list_patterns = (char**)malloc(2*sizeof(char*));
       } else {
-	blockedlist_patterns = realloc(blockedlist_patterns, (found_patterns+2)*sizeof(char*));
+	blocked_list_patterns = realloc(blocked_list_patterns, (found_patterns+2)*sizeof(char*));
       }
-      blockedlist_patterns[found_patterns] = new_pattern;
+      blocked_list_patterns[found_patterns] = new_pattern;
       ++found_patterns;
-      blockedlist_patterns[found_patterns] = NULL;
+      blocked_list_patterns[found_patterns] = NULL;
     } else {
       pos += read_pattern(file_data, pos, file_size, pattern) + 1;
     }
@@ -132,10 +132,10 @@ load_blocked_list(const char* process_name, const char* config_name) {
 
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
-  if (blockedlist_patterns) {
-    for (size_t i = 0; blockedlist_patterns[i] != NULL; ++i)
+  if (blocked_list_patterns) {
+    for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
       {
-	if (match_path(blockedlist_patterns[i], name) == 0)
+	if (match_path(blocked_list_patterns[i], name) == 0)
 	  {
 	    return NULL;
 	  }
