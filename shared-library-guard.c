@@ -99,7 +99,6 @@ void
 load_blocked_list(void) {
   blockedlist_patterns = NULL;
   size_t found_patterns = 0;
-  char current_path[PATH_MAX];
   size_t file_size = 0;
   char* file_data = read_whole_file(blockedlist_file_name, &file_size);
   if(file_data == NULL)
