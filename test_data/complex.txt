@@ -1,0 +1,4 @@
+tester /foo/bar/baz.so
+tester2 w/foo/bar/baz.so
+tester /meep.so
+tester3 foo/bar
