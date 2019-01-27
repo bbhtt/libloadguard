@@ -17,17 +17,19 @@
 
 #include <assert.h>
 #include "shared-library-guard.c"
+#define PATTERN_START 3
+
 
 int main(int argc, const char * argv[]) {
   load_blocked_list(argv[1], argv[2]);
-  if (argv == ) {
+  if (argc < PATTERN_START) {
     assert(blocked_list_patterns == NULL);
   } else {
     int i = 0;
-    for (; i < argc - 3; i++) {
+    for (; i < argc - PATTERN_START; i++) {
       const char* pattern = blocked_list_patterns[i];
       assert(pattern != NULL);
-      assert(strcmp(pattern, argv[i + 3]));
+      assert(strcmp(pattern, argv[i + PATTERN_START]));
     }
     assert(blocked_list_patterns[i] == NULL);
   }
