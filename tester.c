@@ -1,5 +1,6 @@
 /* shared-library-guard tester
  * Copyright (C) 2019 Seppo Yli-Olli
+ * Copyright (C) 2019 Codethink Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +23,14 @@
 
 int main(int argc, const char * argv[]) {
   load_blocked_list(argv[1], argv[2]);
-  if (argc < PATTERN_START) {
+  if (argc <= PATTERN_START) {
     assert(blocked_list_patterns == NULL);
   } else {
     int i = 0;
     for (; i < argc - PATTERN_START; i++) {
       const char* pattern = blocked_list_patterns[i];
       assert(pattern != NULL);
-      assert(strcmp(pattern, argv[i + PATTERN_START]));
+      assert(0 == strcmp(pattern, argv[i + PATTERN_START]));
     }
     assert(blocked_list_patterns[i] == NULL);
   }
