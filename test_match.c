@@ -1,5 +1,4 @@
 /* shared-library-guard tester
- * Copyright (C) 2019 Seppo Yli-Olli
  * Copyright (C) 2019 Codethink Ltd.
  *
  * This library is free software; you can redistribute it and/or
@@ -18,20 +17,15 @@
 
 #include <assert.h>
 #include "shared-library-guard.c"
-#define PATTERN_START 3
 
-
-int main(int argc, const char * argv[]) {
-  load_blocked_list(argv[1], argv[2]);
-  if (argc <= PATTERN_START) {
-    assert(blocked_list_patterns == NULL);
+int main(int argc, char* argv[]) {
+  if (argc != 4)
+    return 1;
+  if (0 == strcmp(argv[1], "true")) {
+    return match_path(argv[2], argv[3])?0:1;
+  } else if (0 == strcmp(argv[1], "false")) {
+    return match_path(argv[2], argv[3])?1:0;
   } else {
-    int i = 0;
-    for (; i < argc - PATTERN_START; i++) {
-      const char* pattern = blocked_list_patterns[i];
-      assert(pattern != NULL);
-      assert(0 == strcmp(pattern, argv[i + PATTERN_START]));
-    }
-    assert(blocked_list_patterns[i] == NULL);
+    return 1;
   }
 }
