@@ -143,13 +143,16 @@ load_blocked_list(const char* process_name, const char* config_name) {
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
   if (blocked_list_patterns) {
+    char* real_name = realpath(name, NULL);
     for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
       {
-	if (match_path(blocked_list_patterns[i], name) == 0)
+	if (match_path(blocked_list_patterns[i], real_name?real_name:name))
 	  {
+	    free(real_name);
 	    return NULL;
 	  }
       }
+    free(real_name);
   }
   return (char*)name;
 }
