@@ -159,6 +159,14 @@ char
 
 unsigned int
 la_version(unsigned int version) {
-  load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
+  char real_path[PATH_MAX+1];
+  ssize_t real_path_size;
+  real_path_size = readlink("/proc/self/exe", real_path, PATH_MAX);
+  if (real_path_size != -1) {
+    real_path[real_path_size] = '\0';
+    load_blocked_list(real_path, SHARED_LIBRARY_GUARD_CONFIG);
+  } else {
+    load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
+  }
   return version;
 }
