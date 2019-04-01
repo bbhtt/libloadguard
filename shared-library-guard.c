@@ -1,5 +1,6 @@
 /* shared-library-guard
  * Copyright (C) 2019 Seppo Yli-Olli
+ * Copyright (C) 2019 Codethink Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,8 +40,17 @@ static int match_path(const char* pattern, const char* filename) {
     return 0 == strcmp(pattern, filename);
   }
   else {
-    for (const char* path = filename; path != NULL; path = strchr(path, '/')) {
+    const char* path = filename;
+    if ((path != NULL) && (*path) && (path[0] != '/')) {
+      /* relative path */
       if (0 == strcmp(pattern, path))
+        return true;
+      path = strchr(path, '/');
+    }
+    for (;
+	 (path != NULL) && (*path);
+	 path = strchr(path+1, '/')) {
+      if (0 == strcmp(pattern, path+1))
         return true;
     }
     return false;
