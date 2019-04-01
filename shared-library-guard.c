@@ -73,7 +73,7 @@ read_pattern(char* file, size_t pos, size_t last_pos, char pattern[PATH_MAX]) {
   if (pattern_pos >= PATH_MAX)
     pattern_pos = PATH_MAX-1;
   pattern[pattern_pos] = 0;
-  return pattern_pos;
+  return pos+1;
 }
 
 
@@ -105,16 +105,16 @@ load_blocked_list(const char* process_name, const char* config_name) {
   size_t pos = 0;
   while (pos < file_size) {
     char pattern[PATH_MAX];
-    size_t pattern_pos = read_pattern(file_data, pos, file_size, pattern);
-    pos += pattern_pos + 1;
+    pos = read_pattern(file_data, pos, file_size, pattern);
     if (pos >= file_size)
       break ;
     if (match_path(pattern, process_name)) {
       char *new_pattern;
-      pattern_pos = read_pattern(file_data, pos, file_size, pattern);
-      pos += pattern_pos + 1;
-      new_pattern = (char*)malloc(pattern_pos);
-      memcpy(pattern, new_pattern, pattern_pos);
+      size_t len;
+      pos = read_pattern(file_data, pos, file_size, pattern);
+      len = strlen(pattern);
+      new_pattern = (char*)malloc(len+1);
+      memcpy(new_pattern, pattern, len+1);
       if (blocked_list_patterns == NULL) {
 	blocked_list_patterns = (char**)malloc(2*sizeof(char*));
       } else {
@@ -124,7 +124,7 @@ load_blocked_list(const char* process_name, const char* config_name) {
       ++found_patterns;
       blocked_list_patterns[found_patterns] = NULL;
     } else {
-      pos += read_pattern(file_data, pos, file_size, pattern) + 1;
+      pos = read_pattern(file_data, pos, file_size, pattern);
     }
   }
   munmap(file_data, file_size);
