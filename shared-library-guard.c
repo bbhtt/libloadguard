@@ -1,5 +1,6 @@
 /* shared-library-guard
  * Copyright (C) 2019 Seppo Yli-Olli
+ * Copyright (C) 2019 Codethink Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,8 +40,17 @@ static int match_path(const char* pattern, const char* filename) {
     return 0 == strcmp(pattern, filename);
   }
   else {
-    for (const char* path = filename; path != NULL; path = strchr(path, '/')) {
+    const char* path = filename;
+    if ((path != NULL) && (*path) && (path[0] != '/')) {
+      /* relative path */
       if (0 == strcmp(pattern, path))
+        return true;
+      path = strchr(path, '/');
+    }
+    for (;
+	 (path != NULL) && (*path);
+	 path = strchr(path+1, '/')) {
+      if (0 == strcmp(pattern, path+1))
         return true;
     }
     return false;
@@ -73,7 +83,7 @@ read_pattern(char* file, size_t pos, size_t last_pos, char pattern[PATH_MAX]) {
   if (pattern_pos >= PATH_MAX)
     pattern_pos = PATH_MAX-1;
   pattern[pattern_pos] = 0;
-  return pattern_pos;
+  return pos+1;
 }
 
 
@@ -105,16 +115,16 @@ load_blocked_list(const char* process_name, const char* config_name) {
   size_t pos = 0;
   while (pos < file_size) {
     char pattern[PATH_MAX];
-    size_t pattern_pos = read_pattern(file_data, pos, file_size, pattern);
-    pos += pattern_pos + 1;
+    pos = read_pattern(file_data, pos, file_size, pattern);
     if (pos >= file_size)
       break ;
     if (match_path(pattern, process_name)) {
       char *new_pattern;
-      pattern_pos = read_pattern(file_data, pos, file_size, pattern);
-      pos += pattern_pos + 1;
-      new_pattern = (char*)malloc(pattern_pos);
-      memcpy(pattern, new_pattern, pattern_pos);
+      size_t len;
+      pos = read_pattern(file_data, pos, file_size, pattern);
+      len = strlen(pattern);
+      new_pattern = (char*)malloc(len+1);
+      memcpy(new_pattern, pattern, len+1);
       if (blocked_list_patterns == NULL) {
 	blocked_list_patterns = (char**)malloc(2*sizeof(char*));
       } else {
@@ -124,7 +134,7 @@ load_blocked_list(const char* process_name, const char* config_name) {
       ++found_patterns;
       blocked_list_patterns[found_patterns] = NULL;
     } else {
-      pos += read_pattern(file_data, pos, file_size, pattern) + 1;
+      pos = read_pattern(file_data, pos, file_size, pattern);
     }
   }
   munmap(file_data, file_size);
@@ -133,19 +143,30 @@ load_blocked_list(const char* process_name, const char* config_name) {
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
   if (blocked_list_patterns) {
+    char* real_name = realpath(name, NULL);
     for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
       {
-	if (match_path(blocked_list_patterns[i], name) == 0)
+	if (match_path(blocked_list_patterns[i], real_name?real_name:name))
 	  {
+	    free(real_name);
 	    return NULL;
 	  }
       }
+    free(real_name);
   }
   return (char*)name;
 }
 
 unsigned int
 la_version(unsigned int version) {
-  load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
+  char real_path[PATH_MAX+1];
+  ssize_t real_path_size;
+  real_path_size = readlink("/proc/self/exe", real_path, PATH_MAX);
+  if (real_path_size != -1) {
+    real_path[real_path_size] = '\0';
+    load_blocked_list(real_path, SHARED_LIBRARY_GUARD_CONFIG);
+  } else {
+    load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
+  }
   return version;
 }
