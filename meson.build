@@ -14,3 +14,11 @@ test('single_match', tester, args : ['tester', join_paths(meson.source_root(), '
 test('wrong_process', tester, args : ['tester2', join_paths(meson.source_root(), 'test_data/single_library.txt')])
 test('complex', tester, args : ['tester', join_paths(meson.source_root(), 'test_data/complex.txt'), '/foo/bar/baz.so', '/meep.so'])
 test('absolute_path', tester, args : ['/foo/bar/tester', join_paths(meson.source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
+
+test_match = executable('test_match', 'test_match.c')
+
+test('absolute_match', test_match, args : ['true', '/some/absolute/path', '/some/absolute/path'])
+test('absolute_non_match', test_match, args : ['false', '/some/absolute/path', '/root/some/absolute/path'])
+
+test('relative_match', test_match, args : ['true', 'relative/path', '/root/some/relative/path'])
+test('relative_match', test_match, args : ['false', 'relative/path', '/root/some/relative/path/not/finished'])
