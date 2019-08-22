@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fnmatch.h>
 #include "config.h"
 
 
@@ -36,22 +37,13 @@ extern char* program_invocation_name;
 
 
 static int match_path(const char* pattern, const char* filename) {
-  if (pattern[0] == '/') {
-    return 0 == strcmp(pattern, filename);
-  }
-  else {
-    const char* path = filename;
-    if ((path != NULL) && (*path) && (path[0] != '/')) {
-      /* relative path */
-      if (0 == strcmp(pattern, path))
-        return true;
-      path = strchr(path, '/');
-    }
-    for (;
-	 (path != NULL) && (*path);
-	 path = strchr(path+1, '/')) {
-      if (0 == strcmp(pattern, path+1))
-        return true;
+  int ret = fnmatch(pattern, filename, FNM_PATHNAME|FNM_PERIOD|FNM_EXTMATCH);
+  if (ret == 0) {
+    return true;
+  } else {
+    if (ret != FNM_NOMATCH) {
+      fprintf(stderr, "fnmatch pattern %s, filename %s: error %d\n", pattern,
+	     filename, ret);
     }
     return false;
   }
@@ -142,18 +134,16 @@ load_blocked_list(const char* process_name, const char* config_name) {
 
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
-  if (blocked_list_patterns) {
-    char* real_name = realpath(name, NULL);
-    for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
-      {
-	if (match_path(blocked_list_patterns[i], real_name?real_name:name))
-	  {
-	    free(real_name);
-	    return NULL;
-	  }
-      }
-    free(real_name);
-  }
+  char* real_name = realpath(name, NULL);
+  for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
+    {
+      if (match_path(blocked_list_patterns[i], real_name?real_name:name))
+	{
+	  free(real_name);
+	  return NULL;
+	}
+    }
+  free(real_name);
   return (char*)name;
 }
 
@@ -168,5 +158,9 @@ la_version(unsigned int version) {
   } else {
     load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
   }
-  return version;
+  if (blocked_list_patterns == NULL) {
+    return 0;
+  } else {
+    return version;
+  }
 }
