@@ -1,0 +1,4 @@
+projects:
+  shared-library-guard:
+    freedesktop-sdk.bst:
+    - ref: freedesktop-sdk-19.08beta.4-91-g578d19a26f147c0231d141012c533e32e9d0ecf7
