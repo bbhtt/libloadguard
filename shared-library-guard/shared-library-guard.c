@@ -167,7 +167,7 @@ la_version(unsigned int version) {
     load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
   }
   if (blocked_list_patterns == NULL) {
-    return version;
+    return 0;
   } else {
     return version;
   }
