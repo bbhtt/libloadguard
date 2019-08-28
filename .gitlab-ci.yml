@@ -6,6 +6,8 @@ variables:
   DOCKER_AARCH64: "${DOCKER_REGISTRY}/arm64:${IMAGE_ID}"
   DOCKER_POWERPC64LE: "${DOCKER_REGISTRY}/ppc64le:${IMAGE_ID}"
 
+  XDG_CACHE_HOME: "${CI_PROJECT_DIR}/cache"
+
 stages:
   - build
 
