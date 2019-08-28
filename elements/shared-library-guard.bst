@@ -1,9 +1,7 @@
 kind: meson
 
 depends:
-- filename: public-stacks/buildsystem-meson.bst
-  junction: freedesktop-sdk.bst
-- filename: components/strace.bst
+- filename: public-stacks/buildsystems.bst
   junction: freedesktop-sdk.bst
 
 variables:
