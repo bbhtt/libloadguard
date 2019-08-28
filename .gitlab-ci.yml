@@ -1,42 +1,43 @@
-image: gcc:8.2
+variables:
+  IMAGE_ID: 'a12453fe83ee8ab60e2f92ec6aa151a3a588f11b'
+  # Docker Images
+  DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
+  DOCKER_AMD64: "${DOCKER_REGISTRY}/amd64:${IMAGE_ID}"
+  DOCKER_AARCH64: "${DOCKER_REGISTRY}/arm64:${IMAGE_ID}"
+  DOCKER_POWERPC64LE: "${DOCKER_REGISTRY}/ppc64le:${IMAGE_ID}"
 
 stages:
   - build
 
-
 .build_template: &build_definition
   stage: build
   script:
-    - apt update && apt install -y meson
-    - |
-      cd shared-library-guard
-      meson --werror _build
-      ninja -v -C _build
-      meson test
-      ninja -C _build install
+    - bst build shared-library-guard.bst
   artifacts:
-    name: "slg-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
     paths:
-      - "shared-library-guard/_build/config.h"
-      - "shared-library-guard/_build/meson-logs"
+      - ${CI_PROJECT_DIR}/cache/buildstream/logs
 
 build_x86_64:
   <<: *build_definition
+  image: $DOCKER_AMD64
   tags:
     - x86_64
 
 build_i686:
   <<: *build_definition
+  image: $DOCKER_AMD64
   tags:
     - x86_64
 
 build_aarch64:
   <<: *build_definition
+  image: $DOCKER_AARCH64
   tags:
     - aarch64
 
 build_arm:
   <<: *build_definition
+  image: $DOCKER_AARCH64
   tags:
     - armhf
