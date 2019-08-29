@@ -14,7 +14,19 @@ stages:
 .build_template: &build_definition
   stage: build
   script:
-    - bst build shared-library-guard.bst
+    - |
+      if [ -f /cache-certificate/server.crt ]; then
+      mkdir -p ~/.config
+      cat >> ~/.config/buildstream.conf << EOF
+      projects:
+        freedesktop-sdk:
+          artifacts:
+            - url: https://local-cas-server:1102
+              server-cert: /cache-certificate/server.crt
+
+      EOF
+      fi
+      bst build shared-library-guard.bst
   artifacts:
     when: always
     paths:
