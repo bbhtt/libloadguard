@@ -27,6 +27,7 @@ int main(int argc, const char * argv[]) {
     assert(blocked_list_patterns == NULL);
   } else {
     int i = 0;
+    assert(blocked_list_patterns != NULL);
     for (; i < argc - PATTERN_START; i++) {
       const char* pattern = blocked_list_patterns[i];
       assert(pattern != NULL);
