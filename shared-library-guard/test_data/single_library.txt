@@ -1,1 +1,1 @@
-tester /foo/bar/baz.so
+*(/*)tester /foo/bar/baz.so

@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fnmatch.h>
 #include "config.h"
 
 
@@ -36,22 +37,13 @@ extern char* program_invocation_name;
 
 
 static int match_path(const char* pattern, const char* filename) {
-  if (pattern[0] == '/') {
-    return 0 == strcmp(pattern, filename);
-  }
-  else {
-    const char* path = filename;
-    if ((path != NULL) && (*path) && (path[0] != '/')) {
-      /* relative path */
-      if (0 == strcmp(pattern, path))
-        return true;
-      path = strchr(path, '/');
-    }
-    for (;
-	 (path != NULL) && (*path);
-	 path = strchr(path+1, '/')) {
-      if (0 == strcmp(pattern, path+1))
-        return true;
+  int ret = fnmatch(pattern, filename, FNM_PATHNAME|FNM_PERIOD|FNM_EXTMATCH);
+  if (ret == 0) {
+    return true;
+  } else {
+    if (ret != FNM_NOMATCH) {
+      fprintf(stderr, "fnmatch pattern %s, filename %s: error %d\n", pattern,
+	     filename, ret);
     }
     return false;
   }

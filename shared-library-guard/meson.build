@@ -20,5 +20,5 @@ test_match = executable('test_match', 'test_match.c')
 test('absolute_match', test_match, args : ['true', '/some/absolute/path', '/some/absolute/path'])
 test('absolute_non_match', test_match, args : ['false', '/some/absolute/path', '/root/some/absolute/path'])
 
-test('relative_match', test_match, args : ['true', 'relative/path', '/root/some/relative/path'])
+test('relative_match', test_match, args : ['true', '*(/*)relative/path', '/root/some/relative/path'])
 test('relative_match', test_match, args : ['false', 'relative/path', '/root/some/relative/path/not/finished'])
