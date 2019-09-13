@@ -1,8 +1,7 @@
 kind: meson
 
 depends:
-- filename: public-stacks/buildsystems.bst
-  junction: freedesktop-sdk.bst
+- filename: freedesktop-sdk.bst:public-stacks/buildsystems.bst
 
 variables:
   meson-local: |
