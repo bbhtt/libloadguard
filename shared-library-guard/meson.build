@@ -7,6 +7,10 @@ configure_file(output : 'config.h', configuration : conf_data)
 
 shared_library('shared-library-guard', 'shared-library-guard.c',
     install : true)
+
+install_data('shared-library-guard-config-converter', install_dir : 'bin',
+  install_mode : 'rwxr-xr-x')
+
 tester = executable('tester', 'tester.c')
 
 test('empty_file', tester, args : ['tester', join_paths(meson.source_root(), 'test_data/empty_file.txt')])
