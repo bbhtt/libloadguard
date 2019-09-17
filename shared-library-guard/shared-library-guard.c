@@ -33,10 +33,15 @@
 
 
 static char** blocked_list_patterns = NULL;
+static int debug_mode = 0;
 extern char* program_invocation_name;
+static char* debug_env = "SHARED_LIBRARY_GUARD_DEBUG";
 
 
 static int match_path(const char* pattern, const char* filename) {
+  if (debug_mode) {
+    fprintf(stderr, "pattern %s, filename %s\n", pattern, filename);
+  }
   int ret = fnmatch(pattern, filename, FNM_PATHNAME|FNM_PERIOD|FNM_EXTMATCH);
   if (ret == 0) {
     return true;
@@ -132,17 +137,32 @@ load_blocked_list(const char* process_name, const char* config_name) {
   munmap(file_data, file_size);
 }
 
+static
+int
+should_block(const char* library_name) {
+  if (debug_mode) {
+    fprintf(stderr, "Trying to load library %s\n", library_name);
+  }
+  if (blocked_list_patterns == NULL) {
+    return false;
+  } else
+    for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
+      {
+	if (match_path(blocked_list_patterns[i], library_name))
+	  {
+	    fprintf(stderr, "Blocked library %s\n", library_name);
+	    return true;
+	}
+    }
+  return false;
+}
+
 char
 *la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
   char* real_name = realpath(name, NULL);
-  for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
-    {
-      if (match_path(blocked_list_patterns[i], real_name?real_name:name))
-	{
-	  free(real_name);
-	  return NULL;
-	}
-    }
+  if (should_block(real_name?real_name:name)) {
+    name = NULL;
+  }
   free(real_name);
   return (char*)name;
 }
@@ -151,16 +171,29 @@ unsigned int
 la_version(unsigned int version) {
   char real_path[PATH_MAX+1];
   ssize_t real_path_size;
-  real_path_size = readlink("/proc/self/exe", real_path, PATH_MAX);
-  if (real_path_size != -1) {
-    real_path[real_path_size] = '\0';
-    load_blocked_list(real_path, SHARED_LIBRARY_GUARD_CONFIG);
-  } else {
-    load_blocked_list(program_invocation_name, SHARED_LIBRARY_GUARD_CONFIG);
+  char *debug_value = getenv(debug_env);
+  if (debug_value) {
+    debug_mode = 1;
   }
-  if (blocked_list_patterns == NULL) {
-    return 0;
+  real_path_size = readlink("/proc/self/exe", real_path, PATH_MAX);
+  if (real_path_size == -1) {
+    strcpy(program_invocation_name, real_path);
   } else {
+    real_path[real_path_size] = '\0';
+  }
+  load_blocked_list(real_path, SHARED_LIBRARY_GUARD_CONFIG);
+  if (blocked_list_patterns == NULL) {
+    if (debug_value && match_path(debug_value, real_path)) {
+      fprintf(stderr, "shared-library-guard active for %s\n", real_path);
+      return version;
+    } else {
+      if (debug_mode) {
+	fprintf(stderr, "shared-library-guard inactivate for %s\n", real_path);
+      }
+      return 0;
+    }
+  } else {
+    fprintf(stderr, "shared-library-guard active for %s\n", real_path);
     return version;
   }
 }

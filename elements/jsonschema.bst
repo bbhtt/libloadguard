@@ -1,20 +1,21 @@
 kind: pip
 
 depends:
-- filename: freedesktop-sdk.bst:components/python3.bst
+- freedesktop-sdk.bst:components/python3.bst
 
 build-depends:
-- filename: freedesktop-sdk.bst:components/python3-pip.bst
-- filename: setuptools-scm.bst
-- filename: wheel.bst
+- freedesktop-sdk.bst:components/python3-pip.bst
+- freedesktop-sdk.bst:components/python3-setuptools-scm.bst
+- freedesktop-sdk.bst:components/python3-wheel.bst
 
 runtime-depends:
-- filename: attrs.bst
-- filename: freedesktop-sdk.bst:components/python3-six.bst
-- filename: pyrsistent.bst
+- freedesktop-sdk.bst:components/python3-attrs.bst
+- freedesktop-sdk.bst:components/python3-six.bst
+- pyrsistent.bst
 
 sources:
 - kind: git_tag
   url: github:Julian/jsonschema.git
   track: master
   track-tags: True
+  ref: v3.0.2-0-gd5946354b2277961f1886002e835d40ee183f7b9

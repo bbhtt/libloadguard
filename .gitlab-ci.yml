@@ -1,57 +1,91 @@
 variables:
-  IMAGE_ID: '16c77002cb55091b66df200a4453ab98c76e9b76'
+  BST_CACHE_SERVER_ADDRESS: 'freedesktop-sdk-cache.codethink.co.uk'
+  IMAGE_ID: '6e1e605bbe7781efd451dd0c155e85ea94adf49e'
   # Docker Images
   DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
-  DOCKER_AMD64: "${DOCKER_REGISTRY}/bst14/amd64:${IMAGE_ID}"
-  DOCKER_AARCH64: "${DOCKER_REGISTRY}/bst14/arm64:${IMAGE_ID}"
-  DOCKER_POWERPC64LE: "${DOCKER_REGISTRY}/bst14/ppc64le:${IMAGE_ID}"
+  DOCKER_AMD64: "${DOCKER_REGISTRY}/bst16/amd64:${IMAGE_ID}"
+  DOCKER_AARCH64: "${DOCKER_REGISTRY}/bst16/arm64:${IMAGE_ID}"
+  DOCKER_POWERPC64LE: "${DOCKER_REGISTRY}/bst16/ppc64le:${IMAGE_ID}"
 
   XDG_CACHE_HOME: "${CI_PROJECT_DIR}/cache"
 
 stages:
   - build
 
-.build_template: &build_definition
+.build_template:
   stage: build
   script:
-    - |
-      if [ -f /cache-certificate/server.crt ]; then
-      mkdir -p ~/.config
-      cat >> ~/.config/buildstream.conf << EOF
-      projects:
-        freedesktop-sdk:
-          artifacts:
-            - url: https://local-cas-server:1102
-              server-cert: /cache-certificate/server.crt
+  - ulimit -n 1048576
+  - |
+    if [ -n "$BB_CAS_PUSH_CERT" ] && [ -n "$BB_CAS_PUSH_KEY" ]; then
+      mkdir -p /etc/ssl/CAS
+      echo "$BB_CAS_PUSH_CERT" > /etc/ssl/CAS/server.crt
+      echo "$BB_CAS_PUSH_KEY" > /etc/ssl/CAS/server.key
+    fi
 
-      EOF
-      fi
-      bst build shared-library-guard.bst
+  - |
+    mkdir -p ~/.config
+    cat > ~/.config/buildstream.conf << EOF
+    # Get a lot of output in case of errors
+    logging:
+      error-lines: 80
+    # Force higher parallelity
+    build:
+      max-jobs: $(( $(nproc) / 4 ))
+    
+    EOF
+
+  - |
+    {
+    echo "projects:"
+    echo "  freedesktop-sdk:"
+    echo "    artifacts:"
+    if [ -f "/cache-certificate/server.crt" ]; then
+    echo "    - url: https://local-cas-server:1102"
+    echo "      server-cert: /cache-certificate/server.crt"
+    if [ -f "/etc/ssl/CAS/server.key" ]; then
+    echo "      client-key: /etc/ssl/CAS/server.key"
+    echo "      client-cert: /etc/ssl/CAS/server.crt"
+    echo "      push: true"
+    fi
+    fi
+    if [ -f "/etc/ssl/CAS/server.key" ]; then
+    echo "    - url: https://${BST_CACHE_SERVER_ADDRESS}:11002"
+    echo "      client-key: /etc/ssl/CAS/server.key"
+    echo "      client-cert: /etc/ssl/CAS/server.crt"
+    echo "      push: true"
+    else
+    echo "    - url: https://${BST_CACHE_SERVER_ADDRESS}:11001"
+    fi
+    } >> ~/.config/buildstream.conf
+  - | 
+    bst --colors build shared-library-guard.bst
+
+  interruptible: true
   artifacts:
     when: always
     paths:
       - ${CI_PROJECT_DIR}/cache/buildstream/logs
 
 build_x86_64:
-  <<: *build_definition
+  extends:
+  - .build_template
   image: $DOCKER_AMD64
   tags:
-    - x86_64
+  - x86_64
+  - cache_x86_64
 
 build_i686:
-  <<: *build_definition
+  extends:
+  - .build_template
   image: $DOCKER_AMD64
   tags:
-    - x86_64
+  - x86_64
+  - cache_i686
 
 build_aarch64:
-  <<: *build_definition
+  extends:
+  - .build_template
   image: $DOCKER_AARCH64
   tags:
-    - aarch64
-
-build_arm:
-  <<: *build_definition
-  image: $DOCKER_AARCH64
-  tags:
-    - armhf
+  - aarch64

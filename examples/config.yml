@@ -1,0 +1,26 @@
+entries:
+  - basedir: "*(/*|/.*)/Proton 4.11/dist"
+    blocklists:
+      - binaries:
+          - path: bin/wine
+            libdir: lib
+          - path: bin/wine-preloader
+            libdir: lib
+          - path: bin/wine64
+            libdir: lib64
+          - path: bin/wine64-preloader
+            libdir: lib64
+        libraries:
+          - path: libFAudio.so.19.08
+          - path: libFAudio.so.19.09
+
+  - basedir: "*(/*|/.*)/Torchlight II"
+    blocklists:
+      - binaries:
+          - path: ModLauncher.bin.x86_64
+            libdir: lib64
+          - path: ModLauncher.bin.x86
+            libdir: lib
+        libraries:
+          - path: libfontconfig.so.1
+          - path: libSDL2-2.0.so.0
