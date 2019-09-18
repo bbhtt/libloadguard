@@ -71,7 +71,7 @@ SCHEMA = {
     }
 }
 
-ESCAPE_CHARS = "\\ \'$|<>?"
+ESCAPE_CHARS = "\\ \n"
 
 def escape(string: str):
     s = str(string)
