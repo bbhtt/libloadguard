@@ -1,0 +1,20 @@
+projects:
+  shared-library-guard:
+    attrs.bst:
+    - ref: 19.1.0-0-g0356f0603eb5d8d4e7bae132ab80847fff4abcfc
+    jsonschema.bst:
+    - ref: v3.0.2-0-gd5946354b2277961f1886002e835d40ee183f7b9
+    libyaml.bst:
+    - ref: 0.2.2-0-g690a781ef6af70ce6749d6e2be91743345123998
+    pyrsistent.bst:
+    - ref: v0.15.4-0-gbc4a122eb16f90c95c3b80679954cec473f3afb0
+    cython.bst:
+    - ref: 0.29.13-0-gd4610f39a43a658cee1862c899a9696d8a9c9f5f
+    pyyaml.bst:
+    - ref: 5.1.2-0-g0f64cbfa54b0b22dc7b776b7b98a7cd657e84d78
+    shared-library-guard.bst:
+    - {}
+    setuptools-scm.bst:
+    - ref: v3.3.3-0-gfe2ea13e9d00c7f0873f149de42b1deaca4aa924
+    wheel.bst:
+    - ref: 0.33.6-0-gb227ddd5beaba49294017d061d501f6d433393b0
