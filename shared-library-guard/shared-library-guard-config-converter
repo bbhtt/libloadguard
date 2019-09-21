@@ -3,6 +3,7 @@
 from pathlib import Path
 import argparse
 import sys
+import itertools
 import json
 import yaml
 import jsonschema
@@ -113,12 +114,14 @@ def load_manifest(manifest_path):
 
 def main():
     parser = argparse.ArgumentParser("Generate ld.so blocklist for Freedesktop.org SDK")
-    parser.add_argument("manifest")
+    parser.add_argument("manifest", nargs="+", help="Path to manifest file")
     parser.add_argument("-o", "--outfile", required=False, help="Write blocklist to this file")
     args = parser.parse_args()
 
-    manifest = load_manifest(args.manifest)
-    blocklist = "\n".join(generate_blocklist(manifest)) + "\n"
+    blocklist_lines = itertools.chain(*[
+        generate_blocklist(load_manifest(m)) for m in args.manifest
+    ])
+    blocklist = "\n".join(blocklist_lines) + "\n"
 
     if args.outfile is not None:
         with open(args.outfile, "w") as f:
