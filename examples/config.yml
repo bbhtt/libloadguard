@@ -1,5 +1,5 @@
 entries:
-  - basedir: "*(/*)Proton 4.11/dist"
+  - basedir: "*(/*|/.*)/Proton 4.11/dist"
     blocklists:
       - binaries:
           - path: bin/wine
@@ -14,7 +14,7 @@ entries:
           - path: libFAudio.so.19.08
           - path: libFAudio.so.19.09
 
-  - basedir: "*(/*)Torchlight II"
+  - basedir: "*(/*|/.*)/Torchlight II"
     blocklists:
       - binaries:
           - path: ModLauncher.bin.x86_64
