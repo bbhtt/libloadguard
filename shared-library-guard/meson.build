@@ -26,3 +26,6 @@ test('absolute_non_match', test_match, args : ['false', '/some/absolute/path', '
 
 test('relative_match', test_match, args : ['true', '*(/*)/relative/path', '/root/some/relative/path'])
 test('relative_match', test_match, args : ['false', 'relative/path', '/root/some/relative/path/not/finished'])
+
+test('relative_match_hidden', test_match, args : ['false', '*(/*)/relative/path', '/root/.some/relative/path'])
+test('relative_match_hidden', test_match, args : ['true', '*(/*|/.*)/relative/path', '/root/.some/relative/path'])
