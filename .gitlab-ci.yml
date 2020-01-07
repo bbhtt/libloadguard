@@ -1,5 +1,5 @@
 variables:
-  IMAGE_ID: '16c77002cb55091b66df200a4453ab98c76e9b76'
+  IMAGE_ID: 'e593f441b6ac7536b0e35a4354dc20c6c123f6b5'
   # Docker Images
   DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
   DOCKER_AMD64: "${DOCKER_REGISTRY}/bst14/amd64:${IMAGE_ID}"
