@@ -1,12 +1,12 @@
 kind: pip
 
 depends:
-- filename: freedesktop-sdk.bst:components/python3.bst
-- filename: libyaml.bst
+- freedesktop-sdk.bst:components/python3.bst
+- libyaml.bst
 
 build-depends:
-- filename: freedesktop-sdk.bst:components/python3-pip.bst
-- filename: cython.bst
+- freedesktop-sdk.bst:components/cython.bst
+- freedesktop-sdk.bst:components/python3-pip.bst
 
 sources:
 - kind: git_tag
