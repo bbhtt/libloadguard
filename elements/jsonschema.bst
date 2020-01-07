@@ -1,17 +1,17 @@
 kind: pip
 
 depends:
-- filename: freedesktop-sdk.bst:components/python3.bst
+- freedesktop-sdk.bst:components/python3.bst
 
 build-depends:
-- filename: freedesktop-sdk.bst:components/python3-pip.bst
-- filename: setuptools-scm.bst
-- filename: wheel.bst
+- freedesktop-sdk.bst:components/python3-pip.bst
+- freedesktop-sdk.bst:components/python3-setuptools-scm.bst
+- freedesktop-sdk.bst:components/python3-wheel.bst
 
 runtime-depends:
-- filename: attrs.bst
-- filename: freedesktop-sdk.bst:components/python3-six.bst
-- filename: pyrsistent.bst
+- freedesktop-sdk.bst:components/python3-attrs.bst
+- freedesktop-sdk.bst:components/python3-six.bst
+- pyrsistent.bst
 
 sources:
 - kind: git_tag
