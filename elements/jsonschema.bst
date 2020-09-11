@@ -18,3 +18,4 @@ sources:
   url: github:Julian/jsonschema.git
   track: master
   track-tags: True
+  ref: v3.0.2-0-gd5946354b2277961f1886002e835d40ee183f7b9

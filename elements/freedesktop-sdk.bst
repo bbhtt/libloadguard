@@ -13,5 +13,6 @@ config:
 sources:
 - kind: git_tag
   url: https://gitlab.com/freedesktop-sdk/freedesktop-sdk.git
-  track: 19.08
+  track: release/20.08
   track-tags: True
+  ref: freedesktop-sdk-20.08.0
