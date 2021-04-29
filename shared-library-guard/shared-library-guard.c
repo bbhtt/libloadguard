@@ -36,6 +36,7 @@ static char** blocked_list_patterns = NULL;
 static int debug_mode = 0;
 extern char* program_invocation_name;
 static char* debug_env = "SHARED_LIBRARY_GUARD_DEBUG";
+static char* config_env = "SHARED_LIBRARY_GUARD_CONFIG";
 
 
 static int match_path(const char* pattern, const char* filename) {
@@ -171,6 +172,7 @@ unsigned int
 la_version(unsigned int version) {
   char real_path[PATH_MAX+1];
   ssize_t real_path_size;
+  char *config_path = getenv(config_env);
   char *debug_value = getenv(debug_env);
   if (debug_value) {
     debug_mode = 1;
@@ -181,7 +183,13 @@ la_version(unsigned int version) {
   } else {
     real_path[real_path_size] = '\0';
   }
-  load_blocked_list(real_path, SHARED_LIBRARY_GUARD_CONFIG);
+  if (config_path == NULL) {
+    config_path = SHARED_LIBRARY_GUARD_CONFIG;
+  }
+  if (debug_mode) {
+    fprintf(stderr, "Using the configuration file %s\n", config_path);
+  }
+  load_blocked_list(real_path, config_path);
   if (blocked_list_patterns == NULL) {
     if (debug_value && match_path(debug_value, real_path)) {
       fprintf(stderr, "shared-library-guard active for %s\n", real_path);
