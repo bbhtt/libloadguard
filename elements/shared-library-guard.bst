@@ -1,12 +1,12 @@
 kind: meson
 
 build-depends:
-- filename: freedesktop-sdk.bst:public-stacks/buildsystem-meson.bst
+- freedesktop-sdk.bst:public-stacks/buildsystem-meson.bst
 
 runtime-depends:
-- filename: freedesktop-sdk.bst:bootstrap-import.bst
-- filename: pyyaml.bst
-- filename: jsonschema.bst
+- freedesktop-sdk.bst:bootstrap-import.bst
+- freedesktop-sdk.bst:components/python3-pyyaml.bst
+- jsonschema.bst
 
 variables:
   meson-local: |
