@@ -3,11 +3,11 @@ variables:
   IMAGE_ID: '6e1e605bbe7781efd451dd0c155e85ea94adf49e'
   # Docker Images
   DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
-  DOCKER_AMD64: "${DOCKER_REGISTRY}/bst16/amd64:${IMAGE_ID}"
-  DOCKER_AARCH64: "${DOCKER_REGISTRY}/bst16/arm64:${IMAGE_ID}"
-  DOCKER_POWERPC64LE: "${DOCKER_REGISTRY}/bst16/ppc64le:${IMAGE_ID}"
 
   XDG_CACHE_HOME: "${CI_PROJECT_DIR}/cache"
+
+default:
+  image: "${DOCKER_REGISTRY}/bst16:latest"
 
 stages:
   - build
@@ -70,7 +70,6 @@ stages:
 build_x86_64:
   extends:
   - .build_template
-  image: $DOCKER_AMD64
   tags:
   - x86_64
   - cache_x86_64
@@ -78,7 +77,6 @@ build_x86_64:
 build_i686:
   extends:
   - .build_template
-  image: $DOCKER_AMD64
   tags:
   - x86_64
   - cache_i686
@@ -86,6 +84,5 @@ build_i686:
 build_aarch64:
   extends:
   - .build_template
-  image: $DOCKER_AARCH64
   tags:
   - aarch64
