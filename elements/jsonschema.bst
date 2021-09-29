@@ -4,9 +4,8 @@ depends:
 - freedesktop-sdk.bst:components/python3.bst
 
 build-depends:
-- freedesktop-sdk.bst:components/python3-pip.bst
+- freedesktop-sdk.bst:public-stacks/buildsystem-python.bst
 - freedesktop-sdk.bst:components/python3-setuptools-scm.bst
-- freedesktop-sdk.bst:components/python3-wheel.bst
 
 runtime-depends:
 - freedesktop-sdk.bst:components/python3-attrs.bst

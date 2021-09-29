@@ -4,7 +4,7 @@ depends:
 - freedesktop-sdk.bst:components/python3.bst
 
 build-depends:
-- freedesktop-sdk.bst:components/python3-pip.bst
+- freedesktop-sdk.bst:public-stacks/buildsystem-python.bst
 
 sources:
 - kind: git_tag
