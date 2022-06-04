@@ -1,13 +1,14 @@
 variables:
-  BST_CACHE_SERVER_ADDRESS: 'freedesktop-sdk-cache.codethink.co.uk'
-  IMAGE_ID: '6e1e605bbe7781efd451dd0c155e85ea94adf49e'
+  BST_CACHE_SERVER_ADDRESS: 'cache.freedesktop-sdk.io'
+  IMAGE_ID: '543571583e6271ede4c706aff60d389cf26a13e9'
   # Docker Images
   DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
 
   XDG_CACHE_HOME: "${CI_PROJECT_DIR}/cache"
 
 default:
-  image: "${DOCKER_REGISTRY}/bst16:latest"
+  image: "${DOCKER_REGISTRY}/bst16:${IMAGE_ID}"
+  interruptible: true
 
 stages:
   - build
@@ -59,9 +60,8 @@ stages:
     fi
     } >> ~/.config/buildstream.conf
   - | 
-    bst --colors build shared-library-guard.bst
+    bst --colors -o arch ${ARCH} build shared-library-guard.bst
 
-  interruptible: true
   artifacts:
     when: always
     paths:
@@ -72,17 +72,21 @@ build_x86_64:
   - .build_template
   tags:
   - x86_64
-  - cache_x86_64
+  variables:
+    ARCH: x86_64
 
 build_i686:
   extends:
   - .build_template
   tags:
   - x86_64
-  - cache_i686
+  variables:
+    ARCH: i686
 
 build_aarch64:
   extends:
   - .build_template
   tags:
   - aarch64
+  variables:
+    ARCH: aarch64
