@@ -14,8 +14,8 @@ variables:
 
 config:
   build-commands:
-  - "%{ninja}"
-  - meson test -C _builddir
+    (>):
+    - meson test -C _builddir
     
 sources:
 - kind: local

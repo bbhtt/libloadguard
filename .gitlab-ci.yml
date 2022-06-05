@@ -15,6 +15,11 @@ stages:
 
 .build_template:
   stage: build
+  except:
+  - master
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
   - ulimit -n 1048576
   - |
