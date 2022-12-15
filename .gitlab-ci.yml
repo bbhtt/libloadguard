@@ -1,6 +1,6 @@
 variables:
   BST_CACHE_SERVER_ADDRESS: 'cache.freedesktop-sdk.io'
-  IMAGE_ID: '543571583e6271ede4c706aff60d389cf26a13e9'
+  IMAGE_ID: '178fffe2393e1582294f07a80909e6f35f767294'
   # Docker Images
   DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
 

@@ -10,5 +10,5 @@ sources:
 - kind: pypi
   name: pyrsistent
   ref:
-    sha256sum: d4d61f8b993a7255ba714df3aca52700f8125289f84f704cf80916517c46eb96
-    suffix: 42/ac/455fdc7294acc4d4154b904e80d964cc9aae75b087bbf486be04df9f2abd/pyrsistent-0.18.1.tar.gz
+    sha256sum: bfa0351be89c9fcbcb8c9879b826f4353be10f58f8a677efab0c017bf7137ec2
+    suffix: b8/ef/325da441a385a8a931b3eeb70db23cb52da42799691988d8d943c5237f10/pyrsistent-0.19.2.tar.gz
