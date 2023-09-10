@@ -5,8 +5,8 @@ config:
     target_arch: "%{arch}"
 
 sources:
-- kind: git_tag
+- kind: git_repo
   url: https://gitlab.com/freedesktop-sdk/freedesktop-sdk.git
-  track: release/22.08
-  track-tags: true
-  ref: freedesktop-sdk-22.08.4-0-gf1224db8495fcdcbc3869962a6f763c8f751d34d
+  track: freedesktop-sdk-23.08.*
+  ref-format: git-describe
+  ref: freedesktop-sdk-23.08.0-0-g1533f8d0393984f5684985c8b710e9fbaf9c8734

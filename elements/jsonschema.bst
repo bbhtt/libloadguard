@@ -1,9 +1,8 @@
-kind: pip
+kind: pyproject
 
 build-depends:
-- freedesktop-sdk.bst:public-stacks/buildsystem-python.bst
-- hatchling.bst
-- hatch-vcs.bst
+- freedesktop-sdk.bst:public-stacks/buildsystem-python-hatchling.bst
+- freedesktop-sdk.bst:components/python3-hatch-vcs.bst
 
 depends:
 - freedesktop-sdk.bst:components/python3.bst

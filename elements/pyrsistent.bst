@@ -1,10 +1,10 @@
-kind: pip
+kind: pyproject
+
+build-depends:
+- freedesktop-sdk.bst:public-stacks/buildsystem-python-setuptools.bst
 
 depends:
 - freedesktop-sdk.bst:components/python3.bst
-
-build-depends:
-- freedesktop-sdk.bst:public-stacks/buildsystem-python.bst
 
 sources:
 - kind: pypi
