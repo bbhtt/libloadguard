@@ -49,7 +49,7 @@ static int match_path(const char* pattern, const char* filename) {
   } else {
     if (ret != FNM_NOMATCH) {
       fprintf(stderr, "fnmatch pattern %s, filename %s: error %d\n", pattern,
-	     filename, ret);
+              filename, ret);
     }
     return false;
   }
@@ -124,9 +124,9 @@ load_blocked_list(const char* process_name, const char* config_name) {
       new_pattern = (char*)malloc(len+1);
       memcpy(new_pattern, pattern, len+1);
       if (blocked_list_patterns == NULL) {
-	blocked_list_patterns = (char**)malloc(2*sizeof(char*));
+        blocked_list_patterns = (char**)malloc(2*sizeof(char*));
       } else {
-	blocked_list_patterns = realloc(blocked_list_patterns, (found_patterns+2)*sizeof(char*));
+        blocked_list_patterns = realloc(blocked_list_patterns, (found_patterns+2)*sizeof(char*));
       }
       blocked_list_patterns[found_patterns] = new_pattern;
       ++found_patterns;
@@ -149,11 +149,11 @@ should_block(const char* library_name) {
   } else
     for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
       {
-	if (match_path(blocked_list_patterns[i], library_name))
-	  {
-	    fprintf(stderr, "Blocked library %s\n", library_name);
-	    return true;
-	}
+      if (match_path(blocked_list_patterns[i], library_name))
+        {
+          fprintf(stderr, "Blocked library %s\n", library_name);
+          return true;
+      }
     }
   return false;
 }
@@ -196,7 +196,7 @@ la_version(unsigned int version) {
       return version;
     } else {
       if (debug_mode) {
-	fprintf(stderr, "shared-library-guard inactivate for %s\n", real_path);
+    fprintf(stderr, "shared-library-guard inactivate for %s\n", real_path);
       }
       return 0;
     }
