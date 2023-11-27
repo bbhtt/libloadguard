@@ -81,7 +81,11 @@ read_pattern(char* file, size_t *pos, size_t last_pos, char pattern[PATH_MAX]) {
   if (pattern_pos >= PATH_MAX)
     pattern_pos = PATH_MAX-1;
   pattern[pattern_pos] = 0;
-  ++(*pos);
+  if (*pos == last_pos) {
+    *pos = EOF;
+  } else {
+    ++(*pos);
+  }
   return pattern_pos;
 }
 
@@ -112,10 +116,10 @@ load_blocked_list(const char* process_name, const char* config_name) {
   if(file_data == NULL)
     return;
   size_t pos = 0;
-  while (pos < file_size) {
+  while (pos != EOF) {
     char pattern[PATH_MAX];
     read_pattern(file_data, &pos, file_size, pattern);
-    if (pos >= file_size)
+    if (pos == EOF)
       break ;
     if (match_path(pattern, process_name)) {
       char *new_pattern;
