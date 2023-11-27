@@ -57,18 +57,18 @@ static int match_path(const char* pattern, const char* filename) {
 
 static
 size_t
-read_pattern(char* file, size_t pos, size_t last_pos, char pattern[PATH_MAX]) {
+read_pattern(char* file, size_t *pos, size_t last_pos, char pattern[PATH_MAX]) {
   size_t pattern_pos = 0;
-  for (; pos < last_pos; ++pos) {
-    switch (file[pos]) {
+  for (; *pos < last_pos; ++(*pos)) {
+    switch (file[*pos]) {
       case '\\':
-        ++pos;
-        if (pos >= last_pos) {
+        ++(*pos);
+        if (*pos >= last_pos) {
           goto ret;
         }
       default:
         if (pattern_pos < PATH_MAX) {
-          pattern[pattern_pos] = file[pos];
+          pattern[pattern_pos] = file[*pos];
         }
         ++pattern_pos;
         break ;
@@ -81,7 +81,8 @@ read_pattern(char* file, size_t pos, size_t last_pos, char pattern[PATH_MAX]) {
   if (pattern_pos >= PATH_MAX)
     pattern_pos = PATH_MAX-1;
   pattern[pattern_pos] = 0;
-  return pos+1;
+  ++(*pos);
+  return pattern_pos;
 }
 
 
@@ -113,16 +114,14 @@ load_blocked_list(const char* process_name, const char* config_name) {
   size_t pos = 0;
   while (pos < file_size) {
     char pattern[PATH_MAX];
-    pos = read_pattern(file_data, pos, file_size, pattern);
+    read_pattern(file_data, &pos, file_size, pattern);
     if (pos >= file_size)
       break ;
     if (match_path(pattern, process_name)) {
       char *new_pattern;
-      size_t len;
-      pos = read_pattern(file_data, pos, file_size, pattern);
-      len = strlen(pattern);
-      new_pattern = (char*)malloc(len+1);
-      memcpy(new_pattern, pattern, len+1);
+      size_t num_bytes = read_pattern(file_data, &pos, file_size, pattern);
+      new_pattern = (char*)malloc(num_bytes);
+      memcpy(new_pattern, pattern, num_bytes);
       if (blocked_list_patterns == NULL) {
         blocked_list_patterns = (char**)malloc(2*sizeof(char*));
       } else {
@@ -132,7 +131,7 @@ load_blocked_list(const char* process_name, const char* config_name) {
       ++found_patterns;
       blocked_list_patterns[found_patterns] = NULL;
     } else {
-      pos = read_pattern(file_data, pos, file_size, pattern);
+      read_pattern(file_data, &pos, file_size, pattern);
     }
   }
   munmap(file_data, file_size);
@@ -196,7 +195,7 @@ la_version(unsigned int version) {
       return version;
     } else {
       if (debug_mode) {
-    fprintf(stderr, "shared-library-guard inactivate for %s\n", real_path);
+        fprintf(stderr, "shared-library-guard inactivate for %s\n", real_path);
       }
       return 0;
     }
