@@ -122,11 +122,7 @@ load_blocked_list(const char* process_name, const char* config_name) {
       size_t num_bytes = read_pattern(file_data, &pos, file_size, pattern);
       new_pattern = (char*)malloc(num_bytes);
       memcpy(new_pattern, pattern, num_bytes);
-      if (blocked_list_patterns == NULL) {
-        blocked_list_patterns = (char**)malloc(2*sizeof(char*));
-      } else {
-        blocked_list_patterns = realloc(blocked_list_patterns, (found_patterns+2)*sizeof(char*));
-      }
+      blocked_list_patterns = realloc(blocked_list_patterns, (found_patterns+2)*sizeof(char*));
       blocked_list_patterns[found_patterns] = new_pattern;
       ++found_patterns;
       blocked_list_patterns[found_patterns] = NULL;
