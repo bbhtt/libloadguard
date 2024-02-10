@@ -1,13 +1,8 @@
 variables:
-  BST_CACHE_SERVER_ADDRESS: 'cache.freedesktop-sdk.io'
-  IMAGE_ID: 'latest'
-  # Docker Images
-  DOCKER_REGISTRY: "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images"
-
-  XDG_CACHE_HOME: "${CI_PROJECT_DIR}/cache"
+  RELEASE: "23.08"
 
 default:
-  image: "${DOCKER_REGISTRY}/bst2:${IMAGE_ID}"
+  image: "freedesktopsdk/sdk:${RELEASE}"
   interruptible: true
 
 stages:
@@ -21,60 +16,8 @@ stages:
     max: 2
     when: runner_system_failure
   script:
-  # Create CAS directory for SSL keys
-  - |
-    mkdir -p /etc/ssl/CAS
-
-  # Private SSL keys/certs for pushing to the CAS server
-  - |
-    [ -d ~/.config ] || mkdir -p ~/.config
-    cat <<EOF >>~/.config/buildstream.conf
-    # Force higher parallelity
-    build:
-      max-jobs: $(( $(nproc) / 4 ))
-    EOF
-
-    if [ -n "$BB_CAS_PUSH_CERT" ] && [ -n "$BB_CAS_PUSH_KEY" ]; then
-        echo "$BB_CAS_PUSH_CERT" > /etc/ssl/CAS/server.crt
-        echo "$BB_CAS_PUSH_KEY" > /etc/ssl/CAS/server.key
-
-
-        cat <<EOF >>~/.config/buildstream.conf
-    projects:
-    EOF
-        for project in freedesktop-sdk freedesktop-sdk-builder; do
-        cat <<EOF >>~/.config/buildstream.conf
-      ${project}:
-        artifacts:
-          servers:
-    EOF
-        if [ "${DISABLE_LOCAL_CACHE:+set}" != "set" ] && [ -f /cache-certificate/server.crt ]; then
-            cat <<EOF >>~/.config/buildstream.conf
-          - url: https://local-cas-server:1102
-            auth:
-              client-key: /etc/ssl/CAS/server.key
-              client-cert: /etc/ssl/CAS/server.crt
-              server-cert: /cache-certificate/server.crt
-            push: true
-    EOF
-        fi
-        cat <<EOF >>~/.config/buildstream.conf
-          - url: https://cache.freedesktop-sdk.io:11002
-            auth:
-              client-key: /etc/ssl/CAS/server.key
-              client-cert: /etc/ssl/CAS/server.crt
-            push: true
-    EOF
-        done
-    fi
-
-  - | 
-    bst --colors -o arch ${ARCH} build shared-library-guard.bst
-
-  artifacts:
-    when: always
-    paths:
-      - ${CI_PROJECT_DIR}/cache/buildstream/logs
+  - meson setup _build-dir
+  - meson dist -C _build-dir
 
 build_x86_64:
   extends:
