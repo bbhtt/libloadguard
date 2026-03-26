@@ -1,5 +1,5 @@
 variables:
-  RELEASE: "23.08"
+  RELEASE: "25.08"
 
 default:
   image: "freedesktopsdk/sdk:${RELEASE}"
