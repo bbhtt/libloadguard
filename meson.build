@@ -1,4 +1,8 @@
-project('shared-library-guard', 'c', license : 'LGPL')
+project(
+  'shared-library-guard',
+  'c',
+  license : 'LGPL-2.1-or-later'
+)
 
 conf_data = configuration_data()
 conf_data.set_quoted('SHARED_LIBRARY_GUARD_CONFIG', get_option('shared_library_guard_config'))
