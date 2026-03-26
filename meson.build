@@ -1,7 +1,8 @@
 project(
   'shared-library-guard',
   'c',
-  license : 'LGPL-2.1-or-later'
+  license : 'LGPL-2.1-or-later',
+  meson_version : '>=0.56.0',
 )
 
 conf_data = configuration_data()
