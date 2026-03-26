@@ -14,8 +14,11 @@ configure_file(output : 'config.h', configuration : conf_data)
 shared_library('shared-library-guard', 'shared-library-guard.c',
     install : true)
 
-install_data('shared-library-guard-config-converter', install_dir : 'bin',
-  install_mode : 'rwxr-xr-x')
+install_data(
+  'shared-library-guard-config-converter',
+  install_dir : get_option('bindir'),
+  install_mode : 'rwxr-xr-x',
+)
 
 
 if get_option('tests')
