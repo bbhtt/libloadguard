@@ -99,7 +99,7 @@ def load_manifest(manifest_path):
         loader = yaml.safe_load
     else:
         raise ValueError("Manifest format not known.")
-    with open(manifest_path, "r") as mf:
+    with open(manifest_path, "r", encoding="utf-8") as mf:
         manifest = loader(mf)
     jsonschema.validate(instance=manifest, schema=SCHEMA)
     return manifest
@@ -119,7 +119,7 @@ def main():
     blocklist = "\n".join(blocklist_lines) + "\n"
 
     if args.outfile is not None:
-        with open(args.outfile, "w") as f:
+        with open(args.outfile, "w", encoding="utf-8") as f:
             f.write(blocklist)
     else:
         sys.stdout.write(blocklist)
