@@ -73,7 +73,7 @@ def blocklist_line(binary: Path, library: Path):
     return f"{escape(binary)} {escape(library)}"
 
 
-def get_item_path(item: dict, prefix: Path = None):
+def get_item_path(item: dict, prefix: Path | None = None):
     item_path = Path(item["path"])
     if prefix is None or item.get("no-prefix", False) or item_path.is_absolute():
         return item_path
