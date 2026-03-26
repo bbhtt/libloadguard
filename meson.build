@@ -15,8 +15,9 @@ shared_library('shared-library-guard', 'shared-library-guard.c',
     install : true)
 
 install_data(
-  'shared-library-guard-config-converter',
+  'shared-library-guard-config-converter.py',
   install_dir : get_option('bindir'),
+  rename : 'shared-library-guard-config-converter',
   install_mode : 'rwxr-xr-x',
 )
 
