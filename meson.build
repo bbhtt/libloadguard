@@ -17,20 +17,23 @@ shared_library('shared-library-guard', 'shared-library-guard.c',
 install_data('shared-library-guard-config-converter', install_dir : 'bin',
   install_mode : 'rwxr-xr-x')
 
-tester = executable('tester', 'tester.c')
-test('empty_file', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/empty_file.txt')])
-test('single_match', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
-test('wrong_process', tester, args : ['tester2', join_paths(meson.project_source_root(), 'test_data/single_library.txt')])
-test('complex', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/complex.txt'), '/foo/bar/baz.so', '/meep.so'])
-test('absolute_path', tester, args : ['/foo/bar/tester', join_paths(meson.project_source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
 
-test_match = executable('test_match', 'test_match.c')
+if get_option('tests')
+  tester = executable('tester', 'tester.c')
+  test('empty_file', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/empty_file.txt')])
+  test('single_match', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
+  test('wrong_process', tester, args : ['tester2', join_paths(meson.project_source_root(), 'test_data/single_library.txt')])
+  test('complex', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/complex.txt'), '/foo/bar/baz.so', '/meep.so'])
+  test('absolute_path', tester, args : ['/foo/bar/tester', join_paths(meson.project_source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
 
-test('absolute_match', test_match, args : ['true', '/some/absolute/path', '/some/absolute/path'])
-test('absolute_non_match', test_match, args : ['false', '/some/absolute/path', '/root/some/absolute/path'])
+  test_match = executable('test_match', 'test_match.c')
 
-test('relative_match', test_match, args : ['true', '*(/*)/relative/path', '/root/some/relative/path'])
-test('relative_match', test_match, args : ['false', 'relative/path', '/root/some/relative/path/not/finished'])
+  test('absolute_match', test_match, args : ['true', '/some/absolute/path', '/some/absolute/path'])
+  test('absolute_non_match', test_match, args : ['false', '/some/absolute/path', '/root/some/absolute/path'])
 
-test('relative_match_hidden', test_match, args : ['false', '*(/*)/relative/path', '/root/.some/relative/path'])
-test('relative_match_hidden', test_match, args : ['true', '*(/*|/.*)/relative/path', '/root/.some/relative/path'])
+  test('relative_match', test_match, args : ['true', '*(/*)/relative/path', '/root/some/relative/path'])
+  test('relative_match', test_match, args : ['false', 'relative/path', '/root/some/relative/path/not/finished'])
+
+  test('relative_match_hidden', test_match, args : ['false', '*(/*)/relative/path', '/root/.some/relative/path'])
+  test('relative_match_hidden', test_match, args : ['true', '*(/*|/.*)/relative/path', '/root/.some/relative/path'])
+endif
