@@ -1,43 +1,54 @@
 project(
-  'shared-library-guard',
+  'libloadguard',
   'c',
-  license : 'LGPL-2.1-or-later',
-  meson_version : '>=0.56.0',
-  version : '25.03.1',
+  license: 'LGPL-2.1-or-later',
+  meson_version: '>=0.62.0',
+  version: '26.05.0',
+  default_options: 'c_std=gnu99',
 )
 
-conf_data = configuration_data()
-conf_data.set_quoted('SHARED_LIBRARY_GUARD_CONFIG', get_option('shared_library_guard_config'))
-configure_file(output : 'config.h', configuration : conf_data)
+cc = meson.get_compiler('c')
 
+project_c_args = [
+  '-Werror=empty-body',
+  '-Werror=strict-prototypes',
+  '-Werror=missing-prototypes',
+  '-Werror=implicit-function-declaration',
+  '-Werror=format=2',
+  '-Werror=format-security',
+  '-Werror=format-nonliteral',
+  '-Werror=pointer-arith',
+  '-Werror=init-self',
+  '-Werror=missing-declarations',
+  '-Werror=return-type',
+  '-Werror=overflow',
+  '-Werror=int-conversion',
+  '-Werror=parentheses',
+  '-Werror=incompatible-pointer-types',
+  '-Werror=misleading-indentation',
+  '-Werror=missing-include-dirs',
+  '-D_GNU_SOURCE',
+]
 
-shared_library('shared-library-guard', 'shared-library-guard.c',
-    install : true)
+foreach arg: project_c_args
+  if cc.has_argument(arg)
+    add_project_arguments(arg, language: 'c')
+  endif
+endforeach
 
-install_data(
-  'shared-library-guard-config-converter.py',
-  install_dir : get_option('bindir'),
-  rename : 'shared-library-guard-config-converter',
-  install_mode : 'rwxr-xr-x',
-)
+if cc.get_id() == 'clang'
+  clang_args = [
+    '-Wno-typedef-redefinition',
+  ]
+  foreach arg: clang_args
+    if cc.has_argument(arg)
+      add_project_arguments(arg, language: 'c')
+    endif
+  endforeach
+endif
 
-
+subdir('src')
+subdir('utils')
 if get_option('tests')
-  tester = executable('tester', 'tester.c')
-  test('empty_file', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/empty_file.txt')])
-  test('single_match', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
-  test('wrong_process', tester, args : ['tester2', join_paths(meson.project_source_root(), 'test_data/single_library.txt')])
-  test('complex', tester, args : ['tester', join_paths(meson.project_source_root(), 'test_data/complex.txt'), '/foo/bar/baz.so', '/meep.so'])
-  test('absolute_path', tester, args : ['/foo/bar/tester', join_paths(meson.project_source_root(), 'test_data/single_library.txt'), '/foo/bar/baz.so'])
-
-  test_match = executable('test_match', 'test_match.c')
-
-  test('absolute_match', test_match, args : ['true', '/some/absolute/path', '/some/absolute/path'])
-  test('absolute_non_match', test_match, args : ['false', '/some/absolute/path', '/root/some/absolute/path'])
-
-  test('relative_match', test_match, args : ['true', '*(/*)/relative/path', '/root/some/relative/path'])
-  test('relative_match', test_match, args : ['false', 'relative/path', '/root/some/relative/path/not/finished'])
-
-  test('relative_match_hidden', test_match, args : ['false', '*(/*)/relative/path', '/root/.some/relative/path'])
-  test('relative_match_hidden', test_match, args : ['true', '*(/*|/.*)/relative/path', '/root/.some/relative/path'])
+  subdir('tests')
 endif

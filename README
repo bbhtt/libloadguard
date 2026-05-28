@@ -1,0 +1,52 @@
+LD_AUDIT-based runtime shared library path filter to help Flatpak
+applications cope with badly behaving programs.
+
+Versioning follows YY.MM.release
+
+Format:
+
+C code is formatted using Uncrustify [1]. `./uncrustify.sh` can be
+executed to format them.
+
+Python development environment can be set up using uv [2].
+
+```
+uv sync --all-extras --all-groups --frozen
+```
+
+Python code is formatted and linted using Ruff [3].
+
+```
+uv run ruff format
+uv run ruff check . --fix
+```
+
+Type checking for Python code is done using Mypy [4].
+
+
+```
+uv run mypy .
+```
+
+Build:
+
+```
+meson setup --reconfigure builddir -Dtests=true
+meson compile -C builddir
+```
+
+Test:
+
+```
+meson test -C builddir
+uv run pytest
+
+# Requires network
+
+./tests/run_block_test.sh
+```
+
+[1]: https://github.com/uncrustify/uncrustify
+[2]: https://docs.astral.sh/uv/
+[3]: https://docs.astral.sh/ruff/
+[4]: https://mypy.readthedocs.io/en/stable/

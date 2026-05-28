@@ -1,0 +1,13 @@
+builddir/
+.flatpak-builder/
+.flatpak-builder-state/
+repo/
+build/
+.flatpak-test/
+
+__pycache__/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

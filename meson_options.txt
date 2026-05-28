@@ -1,2 +1,12 @@
-option('shared_library_guard_config', type : 'string', value : '/etc/freedesktop-sdk.ld.so.blockedlist', description : 'File whose lines are file pattern library pattern pairs')
-option('tests', type : 'boolean', value : true, description : 'Build and run tests')
+option(
+  'libloadguard_config',
+  type: 'string',
+  value: '/app/etc/libloadguard.blockedlist',
+  description: 'Path to the blocklist config file'
+)
+option(
+  'tests',
+  type: 'boolean',
+  value: false,
+  description: 'Build and run tests'
+)

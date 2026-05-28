@@ -1,0 +1,187 @@
+name: CI
+
+on:
+  push:
+    branches: main
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README'
+      - '.pre-commit-config.yaml'
+  pull_request:
+    branches: main
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README'
+      - '.pre-commit-config.yaml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    concurrency:
+      group: lint-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      # 6.0.2
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        # 7.2.0
+        uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b
+        with:
+          version: "0.9.21"
+          enable-cache: true
+          save-cache: ${{ github.ref == 'refs/heads/main' }}
+          cache-dependency-glob: |
+            **/uv.lock
+            **/pyproject.toml
+
+      - name: Install python dependencies
+        run: uv sync --all-extras --all-groups --frozen
+
+      - name: Check Python code formatting
+        run: uv run ruff format --check
+
+      - name: Check Python code lint
+        run: uv run ruff check --output-format=github
+
+      - name: Check Python code types
+        run: uv run mypy .
+
+      - name: Run tests
+        run: uv run pytest
+
+  flatpak:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: x86_64
+          - os: ubuntu-24.04-arm
+            platform: aarch64
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    concurrency:
+      group: flatpak-${{ matrix.platform }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+
+      # 6.0.2
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        with:
+          path: ${{ github.workspace }}/cache/.flatpak-builder
+          key: ${{ runner.os }}-${{ matrix.platform }}-ci-flatpak-builder-${{ hashFiles('data/io.github.bbhtt.libloadguard.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.platform }}-ci-flatpak-builder-
+
+      - name: Build and run test
+        run: |
+          ./tests/run_block_test.sh
+
+      # 5.0.5
+      - uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: ${{ github.workspace }}/cache/.flatpak-builder
+          key: ${{ runner.os }}-${{ matrix.platform }}-ci-flatpak-builder-${{ hashFiles('data/io.github.bbhtt.libloadguard.json') }}
+
+  build:
+    strategy:
+      matrix:
+        os: ['ubuntu-24.04', 'ubuntu-24.04-arm']
+        compiler: ['gcc', 'clang']
+    runs-on: ${{ matrix.os }}
+    container:
+      image: ubuntu:26.04
+      options: --privileged
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    concurrency:
+      group: build-${{ matrix.os }}-${{ matrix.compiler }}-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      CC: ${{ matrix.compiler }}
+      BUILDDIR: builddir
+      CONFIG_OPTS: -Dtests=true
+      MESON_TEST_TIMEOUT_MULTIPLIER: 2
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install dependencies
+        run: apt-get update && apt-get install -y git findutils
+
+      - name: Set git safe directory
+        run: git config --global safe.directory "*"
+
+      # 6.0.2
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Install build dependencies
+        run: |
+          apt-get install -y ${{ matrix.compiler }} uncrustify shellcheck \
+          $(xargs < .github/dependencies.apt.txt)
+
+      - name: Run shellcheck
+        run: ./shellcheck.sh
+
+      - name: Run uncrustify
+        run: ./uncrustify.sh && git diff --exit-code
+
+      - name: Configure with meson
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            SANITIZE_OPTS="-Db_sanitize=address,undefined"
+          else
+            SANITIZE_OPTS=""
+          fi
+
+          meson setup --wrap-mode nodownload ${CONFIG_OPTS} \
+            -Dwerror=true ${SANITIZE_OPTS} ${BUILDDIR} .
+
+      - name: Build with meson
+        run: meson compile -C ${BUILDDIR}
+
+      - name: Run tests with Meson
+        env:
+          ASAN_OPTIONS: "detect_leaks=1:fast_unwind_on_malloc=0:malloc_context_size=20:symbolize=1"
+          UBSAN_OPTIONS: "print_stacktrace=1"
+        run: |
+          export LSAN_OPTIONS="suppressions=$GITHUB_WORKSPACE/tests/lsan.supp"
+          meson test -C ${BUILDDIR} --verbose --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER}
+
+      - name: Upload test logs
+        # 7.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        if: failure() || cancelled()
+        with:
+          name: test logs
+          path: |
+            builddir/meson-logs/testlog.txt
+            installed-test-logs/
+
+      - name: Create dist tarball
+        run: |
+          meson setup --wrap-mode nodownload --reconfigure ${CONFIG_OPTS} ${BUILDDIR}_dist .
+          meson dist --include-subprojects -C ${BUILDDIR}_dist

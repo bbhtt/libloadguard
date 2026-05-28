@@ -1,0 +1,4 @@
+meson
+ninja-build
+python3-jsonschema
+python3-yaml

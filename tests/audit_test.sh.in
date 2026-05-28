@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -euo pipefail
+
+LOADGUARD_SO='@LOADGUARD_SO@'
+HARNESS='@HARNESS@'
+DUMMY_LIB='@DUMMY_LIB@'
+
+config="$(mktemp)"
+
+trap 'rm -f "$config"' EXIT
+
+printf '%s %s\n' "$HARNESS" "$DUMMY_LIB" > "$config"
+
+if LIBLOADGUARD_CONFIG="$config" LD_AUDIT="$LOADGUARD_SO" "$HARNESS" "$DUMMY_LIB"; then
+  echo "FAIL: Expected dlopen to be blocked but it succeeded"
+  exit 1
+fi
+
+echo "ok: dlopen was blocked"
+
+printf '%s %s\n' "/no/such/process" "$DUMMY_LIB" > "$config"
+
+if ! LIBLOADGUARD_CONFIG="$config" LD_AUDIT="$LOADGUARD_SO" "$HARNESS" "$DUMMY_LIB"; then
+  echo "FAIL: Expected dlopen to succeed but it was blocked"
+  exit 1
+fi
+
+echo "ok: dlopen was not blocked"
