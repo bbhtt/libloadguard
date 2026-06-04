@@ -1,2 +1,12 @@
-option('libloadguard_config', type : 'string', value : '/etc/libloadguard.blockedlist', description : 'File whose lines are file pattern library pattern pairs')
-option('tests', type : 'boolean', value : true, description : 'Build and run tests')
+option(
+  'libloadguard_config',
+  type: 'string',
+  value: '/etc/libloadguard.blockedlist',
+  description: 'File whose lines are file pattern library pattern pairs'
+)
+option(
+  'tests',
+  type: 'boolean',
+  value: false,
+  description: 'Build and run tests'
+)
