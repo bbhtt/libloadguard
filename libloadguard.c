@@ -138,6 +138,23 @@ load_blocked_list(const char* process_name, const char* config_name) {
   munmap(file_data, file_size);
 }
 
+size_t
+get_blocked_pattern_count (void) {
+  if (blocked_list_patterns == NULL)
+    return 0;
+  size_t i = 0;
+  while (blocked_list_patterns[i] != NULL)
+    ++i;
+  return i;
+}
+
+const char *
+get_blocked_pattern (size_t idx) {
+  if (blocked_list_patterns == NULL)
+    return NULL;
+  return blocked_list_patterns[idx];
+}
+
 static
 int
 should_block(const char* library_name) {
