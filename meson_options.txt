@@ -1,7 +1,7 @@
 option(
   'libloadguard_config',
   type: 'string',
-  value: '/etc/libloadguard.blockedlist',
+  value: '/app/etc/libloadguard.blockedlist',
   description: 'File whose lines are file pattern library pattern pairs'
 )
 option(
