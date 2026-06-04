@@ -17,7 +17,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#define _GNU_SOURCE
 #include <link.h>
 #include <string.h>
 #include <stdbool.h>
