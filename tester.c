@@ -1,6 +1,7 @@
 /* shared-library-guard tester
- * Copyright (C) 2019 Seppo Yli-Olli
- * Copyright (C) 2019 Codethink Ltd.
+ * Copyright (C) 2026 bbhtt
+ * Copyright (C) 2019-2026 Seppo Yli-Olli
+ * Copyright (C) 2019-2026 Codethink Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
