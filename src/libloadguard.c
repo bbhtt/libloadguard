@@ -33,112 +33,140 @@
 #include "libloadguard_internal.h"
 
 
-static char** blocked_list_patterns = NULL;
+static char ** blocked_list_patterns = NULL;
 static int debug_mode = 0;
-extern char* program_invocation_name;
-static char* debug_env = "LIBLOADGUARD_DEBUG";
-static char* config_env = "LIBLOADGUARD_CONFIG";
+extern char * program_invocation_name;
+static char * debug_env = "LIBLOADGUARD_DEBUG";
+static char * config_env = "LIBLOADGUARD_CONFIG";
 
 
-int match_path(const char* pattern, const char* filename) {
-  if (debug_mode) {
-    fprintf(stderr, "pattern %s, filename %s\n", pattern, filename);
-  }
-  int ret = fnmatch(pattern, filename, FNM_PATHNAME|FNM_PERIOD|FNM_EXTMATCH);
-  if (ret == 0) {
-    return true;
-  } else {
-    if (ret != FNM_NOMATCH) {
-      fprintf(stderr, "fnmatch pattern %s, filename %s: error %d\n", pattern,
-              filename, ret);
+int
+match_path (const char * pattern, const char * filename)
+{
+  if (debug_mode)
+    fprintf (stderr, "pattern %s, filename %s\n", pattern, filename);
+  int ret = fnmatch (pattern,
+                     filename,
+                     FNM_PATHNAME | FNM_PERIOD | FNM_EXTMATCH);
+  if (ret == 0)
+    {
+      return true;
     }
-    return false;
-  }
+  else
+    {
+      if (ret != FNM_NOMATCH)
+        fprintf (stderr,
+                 "fnmatch pattern %s, filename %s: error %d\n",
+                 pattern,
+                 filename,
+                 ret);
+      return false;
+    }
 }
 
 static
 size_t
-read_pattern(char* file, size_t *pos, size_t last_pos, char pattern[PATH_MAX]) {
+read_pattern (char * file, size_t *pos, size_t last_pos,
+              char pattern[PATH_MAX])
+{
   size_t pattern_pos = 0;
-  for (; *pos < last_pos; ++(*pos)) {
-    switch (file[*pos]) {
-      case '\\':
-        ++(*pos);
-        if (*pos >= last_pos) {
+
+  for (; *pos < last_pos; ++(*pos))
+    {
+      switch (file[*pos])
+        {
+        case '\\':
+          ++(*pos);
+          if (*pos >= last_pos)
+            goto ret;
+
+        default:
+          if (pattern_pos < PATH_MAX)
+            pattern[pattern_pos] = file[*pos];
+          ++pattern_pos;
+          break;
+
+        case ' ':
+        case '\n':
           goto ret;
         }
-      default:
-        if (pattern_pos < PATH_MAX) {
-          pattern[pattern_pos] = file[*pos];
-        }
-        ++pattern_pos;
-        break ;
-      case ' ':
-      case '\n':
-        goto ret;
     }
-  }
-  ret:
+ret:
   if (pattern_pos >= PATH_MAX)
-    pattern_pos = PATH_MAX-1;
+    pattern_pos = PATH_MAX - 1;
   pattern[pattern_pos] = 0;
-  if (*pos == last_pos) {
+  if (*pos == last_pos)
     *pos = EOF;
-  } else {
+  else
     ++(*pos);
-  }
   return pattern_pos;
 }
 
 
 static
 char *
-read_whole_file(const char* name, size_t *file_size) {
+read_whole_file (const char * name, size_t *file_size)
+{
   int fd;
   void * map;
-  if ((fd = open(name, O_RDONLY)) != -1) {
-    struct stat buf;
-    if ((fstat(fd, &buf)) != -1 ) {
-      *file_size = buf.st_size;
-      map = mmap(NULL, *file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+  if ((fd = open (name, O_RDONLY)) != -1)
+    {
+      struct stat buf;
+      if ((fstat (fd,
+                  &buf)) != -1 )
+        {
+          *file_size = buf.st_size;
+          map = mmap (NULL, *file_size, PROT_READ, MAP_PRIVATE, fd, 0);
+        }
+      close (fd);
     }
-    close(fd);
-  }
-  return (char*)map;
+  return (char *) map;
 }
 
 void
-load_blocked_list(const char* process_name, const char* config_name) {
+load_blocked_list (const char * process_name, const char * config_name)
+{
   blocked_list_patterns = NULL;
   size_t found_patterns = 0;
   size_t file_size = 0;
-  char* file_data = read_whole_file(config_name, &file_size);
+  char * file_data = read_whole_file (config_name, &file_size);
   if(file_data == NULL)
     return;
   size_t pos = 0;
-  while (pos != EOF) {
-    char pattern[PATH_MAX];
-    read_pattern(file_data, &pos, file_size, pattern);
-    if (pos == EOF)
-      break ;
-    if (match_path(pattern, process_name)) {
-      char *new_pattern;
-      size_t num_bytes = read_pattern(file_data, &pos, file_size, pattern);
-      new_pattern = (char*)malloc(num_bytes);
-      memcpy(new_pattern, pattern, num_bytes);
-      blocked_list_patterns = realloc(blocked_list_patterns, (found_patterns+2)*sizeof(char*));
-      blocked_list_patterns[found_patterns] = new_pattern;
-      ++found_patterns;
-      blocked_list_patterns[found_patterns] = NULL;
-    } else {
-      read_pattern(file_data, &pos, file_size, pattern);
+  while (pos != EOF)
+    {
+      char pattern[PATH_MAX];
+      read_pattern (file_data, &pos, file_size, pattern);
+      if (pos == EOF)
+        break;
+      if (match_path (pattern, process_name))
+        {
+          char *new_pattern;
+          size_t num_bytes = read_pattern (file_data,
+                                           &pos,
+                                           file_size,
+                                           pattern);
+          new_pattern = (char *) malloc (num_bytes);
+          memcpy (new_pattern, pattern, num_bytes);
+          blocked_list_patterns = realloc (blocked_list_patterns,
+                                           (found_patterns + 2) *
+                                           sizeof (char *));
+          blocked_list_patterns[found_patterns] = new_pattern;
+          ++found_patterns;
+          blocked_list_patterns[found_patterns] = NULL;
+        }
+      else
+        {
+          read_pattern (file_data, &pos, file_size, pattern);
+        }
     }
-  }
-  munmap(file_data, file_size);
+  munmap (file_data, file_size);
 }
 
 size_t
-get_blocked_pattern_count (void) {
+get_blocked_pattern_count (void)
+{
   if (blocked_list_patterns == NULL)
     return 0;
   size_t i = 0;
@@ -148,7 +176,8 @@ get_blocked_pattern_count (void) {
 }
 
 const char *
-get_blocked_pattern (size_t idx) {
+get_blocked_pattern (size_t idx)
+{
   if (blocked_list_patterns == NULL)
     return NULL;
   return blocked_list_patterns[idx];
@@ -156,68 +185,79 @@ get_blocked_pattern (size_t idx) {
 
 static
 int
-should_block(const char* library_name) {
-  if (debug_mode) {
-    fprintf(stderr, "Trying to load library %s\n", library_name);
-  }
-  if (blocked_list_patterns == NULL) {
-    return false;
-  } else
-    for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
-      {
-      if (match_path(blocked_list_patterns[i], library_name))
+should_block (const char * library_name)
+{
+  if (debug_mode)
+    fprintf (stderr, "Trying to load library %s\n", library_name);
+  if (blocked_list_patterns == NULL)
+    {
+      return false;
+    }
+  else
+    {
+      for (size_t i = 0; blocked_list_patterns[i] != NULL; ++i)
         {
-          fprintf(stderr, "Blocked library %s\n", library_name);
-          return true;
-      }
+          if (match_path (blocked_list_patterns[i], library_name))
+            {
+              fprintf (stderr, "Blocked library %s\n", library_name);
+              return true;
+            }
+        }
     }
   return false;
 }
 
 char
-*la_objsearch(const char *name, uintptr_t *cookie, unsigned int flag) {
-  char* real_name = realpath(name, NULL);
-  if (should_block(real_name?real_name:name)) {
+*
+la_objsearch (const char *name, uintptr_t *cookie, unsigned int flag)
+{
+  char * real_name = realpath (name, NULL);
+
+  if (should_block (real_name ? real_name : name))
     name = NULL;
-  }
-  free(real_name);
-  return (char*)name;
+  free (real_name);
+  return (char *) name;
 }
 
 unsigned int
-la_version(unsigned int version) {
-  char real_path[PATH_MAX+1];
+la_version (unsigned int version)
+{
+  char real_path[PATH_MAX + 1];
   ssize_t real_path_size;
-  char *config_path = getenv(config_env);
-  char *debug_value = getenv(debug_env);
-  if (debug_value) {
+  char *config_path = getenv (config_env);
+  char *debug_value = getenv (debug_env);
+
+  if (debug_value)
     debug_mode = 1;
-  }
-  real_path_size = readlink("/proc/self/exe", real_path, PATH_MAX);
-  if (real_path_size == -1) {
-    strcpy(program_invocation_name, real_path);
-  } else {
+  real_path_size = readlink ("/proc/self/exe", real_path, PATH_MAX);
+  if (real_path_size == -1)
+    strcpy (program_invocation_name, real_path);
+  else
     real_path[real_path_size] = '\0';
-  }
-  if (config_path == NULL) {
+  if (config_path == NULL)
     config_path = LIBLOADGUARD_CONFIG;
-  }
-  if (debug_mode) {
-    fprintf(stderr, "Using the configuration file %s\n", config_path);
-  }
-  load_blocked_list(real_path, config_path);
-  if (blocked_list_patterns == NULL) {
-    if (debug_value && match_path(debug_value, real_path)) {
-      fprintf(stderr, "libloadguard active for %s\n", real_path);
-      return version;
-    } else {
-      if (debug_mode) {
-        fprintf(stderr, "libloadguard inactivate for %s\n", real_path);
-      }
-      return 0;
+  if (debug_mode)
+    fprintf (stderr, "Using the configuration file %s\n", config_path);
+  load_blocked_list (real_path, config_path);
+  if (blocked_list_patterns == NULL)
+    {
+      if (debug_value && match_path (debug_value, real_path))
+        {
+          fprintf (stderr, "libloadguard active for %s\n", real_path);
+          return version;
+        }
+      else
+        {
+          if (debug_mode)
+            fprintf (stderr,
+                     "libloadguard inactivate for %s\n",
+                     real_path);
+          return 0;
+        }
     }
-  } else {
-    fprintf(stderr, "libloadguard active for %s\n", real_path);
-    return version;
-  }
+  else
+    {
+      fprintf (stderr, "libloadguard active for %s\n", real_path);
+      return version;
+    }
 }

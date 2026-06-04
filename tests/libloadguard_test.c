@@ -70,7 +70,8 @@ static void
 test_relative_match (void)
 {
   CHECK_MATCH ("*(/*)/relative/path", "/root/some/relative/path");
-  CHECK_NO_MATCH ("relative/path", "/root/some/relative/path/not/finished");
+  CHECK_NO_MATCH ("relative/path",
+                  "/root/some/relative/path/not/finished");
 }
 
 static void
