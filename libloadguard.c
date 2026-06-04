@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <fnmatch.h>
 #include "config.h"
+#include "libloadguard_internal.h"
 
 
 static char** blocked_list_patterns = NULL;
@@ -40,7 +41,7 @@ static char* debug_env = "LIBLOADGUARD_DEBUG";
 static char* config_env = "LIBLOADGUARD_CONFIG";
 
 
-static int match_path(const char* pattern, const char* filename) {
+int match_path(const char* pattern, const char* filename) {
   if (debug_mode) {
     fprintf(stderr, "pattern %s, filename %s\n", pattern, filename);
   }
@@ -107,7 +108,6 @@ read_whole_file(const char* name, size_t *file_size) {
   return (char*)map;
 }
 
-static
 void
 load_blocked_list(const char* process_name, const char* config_name) {
   blocked_list_patterns = NULL;
