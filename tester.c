@@ -1,4 +1,4 @@
-/* shared-library-guard tester
+/* libloadguard tester
  * Copyright (C) 2026 bbhtt
  * Copyright (C) 2019-2026 Seppo Yli-Olli
  * Copyright (C) 2019-2026 Codethink Ltd.
@@ -18,7 +18,7 @@
  */
 
 #include <assert.h>
-#include "shared-library-guard.c"
+#include "libloadguard.c"
 #define PATTERN_START 3
 
 

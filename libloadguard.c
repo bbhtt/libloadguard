@@ -1,4 +1,4 @@
-/* shared-library-guard
+/* libloadguard
  * Copyright (C) 2026 bbhtt
  * Copyright (C) 2019-2026 Seppo Yli-Olli
  * Copyright (C) 2019-2026 Codethink Ltd.
@@ -21,7 +21,7 @@
 #include <link.h>
 #include <string.h>
 #include <stdbool.h>
-#include <linux/limits.h> 
+#include <linux/limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -36,8 +36,8 @@
 static char** blocked_list_patterns = NULL;
 static int debug_mode = 0;
 extern char* program_invocation_name;
-static char* debug_env = "SHARED_LIBRARY_GUARD_DEBUG";
-static char* config_env = "SHARED_LIBRARY_GUARD_CONFIG";
+static char* debug_env = "LIBLOADGUARD_DEBUG";
+static char* config_env = "LIBLOADGUARD_CONFIG";
 
 
 static int match_path(const char* pattern, const char* filename) {
@@ -184,7 +184,7 @@ la_version(unsigned int version) {
     real_path[real_path_size] = '\0';
   }
   if (config_path == NULL) {
-    config_path = SHARED_LIBRARY_GUARD_CONFIG;
+    config_path = LIBLOADGUARD_CONFIG;
   }
   if (debug_mode) {
     fprintf(stderr, "Using the configuration file %s\n", config_path);
@@ -192,16 +192,16 @@ la_version(unsigned int version) {
   load_blocked_list(real_path, config_path);
   if (blocked_list_patterns == NULL) {
     if (debug_value && match_path(debug_value, real_path)) {
-      fprintf(stderr, "shared-library-guard active for %s\n", real_path);
+      fprintf(stderr, "libloadguard active for %s\n", real_path);
       return version;
     } else {
       if (debug_mode) {
-        fprintf(stderr, "shared-library-guard inactivate for %s\n", real_path);
+        fprintf(stderr, "libloadguard inactivate for %s\n", real_path);
       }
       return 0;
     }
   } else {
-    fprintf(stderr, "shared-library-guard active for %s\n", real_path);
+    fprintf(stderr, "libloadguard active for %s\n", real_path);
     return version;
   }
 }

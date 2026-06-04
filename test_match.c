@@ -1,4 +1,4 @@
-/* shared-library-guard tester
+/* libloadguard tester
  * Copyright (C) 2026 bbhtt
  * Copyright (C) 2019-2026 Codethink Ltd.
  *
@@ -17,7 +17,7 @@
  */
 
 #include <assert.h>
-#include "shared-library-guard.c"
+#include "libloadguard.c"
 
 int main(int argc, char* argv[]) {
   if (argc != 4)

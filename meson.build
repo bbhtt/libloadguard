@@ -1,5 +1,5 @@
 project(
-  'shared-library-guard',
+  'libloadguard',
   'c',
   license : 'LGPL-2.1-or-later',
   meson_version : '>=0.56.0',
@@ -7,17 +7,17 @@ project(
 )
 
 conf_data = configuration_data()
-conf_data.set_quoted('SHARED_LIBRARY_GUARD_CONFIG', get_option('shared_library_guard_config'))
-configure_file(output : 'config.h', configuration : conf_data)
+conf_data.set_quoted('LIBLOADGUARD_CONFIG', get_option('libloadguard_config'))
+configure_file(output: 'config.h', configuration: conf_data)
 
 
-shared_library('shared-library-guard', 'shared-library-guard.c',
+shared_library('loadguard', 'libloadguard.c',
     install : true)
 
 install_data(
-  'shared-library-guard-config-converter.py',
+  'libloadguard_config_converter.py',
   install_dir : get_option('bindir'),
-  rename : 'shared-library-guard-config-converter',
+  rename : 'libloadguard-config-converter',
   install_mode : 'rwxr-xr-x',
 )
 
